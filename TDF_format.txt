@@ -1,0 +1,133 @@
+TDF Format for LDC Transcripts
+
+Revision: 1.4 (2010-09-29)
+
+TDF Format (general description)
+--------------------------------
+
+Tab Delimited Format (TDF) is a simple file format in which data is
+represented as a set of "records", which are in turn a set of "fields"
+separated by tab characters.  Records may have different types as in the
+RTTM format [1].  This implies two things: 1) two differnt records may
+have different number of fields, and 2) two fields with same column index,
+each belonging to a different record, may have different meanings, e.g
+date vs. name.
+
+
+TDF Format for LDC Transcripts
+------------------------------
+
+The TDF format for LDC transcripts is a set of 13-field records plus
+some meta-information. This format was originally designed for use with LDC's
+new transcription tool XTrans. The 13-field record is also called segment, and
+all segments in the file are identical.  The 13 fields are listed below.
+
+	 1 file			file name or id		string
+	 2 channel		audio channel		number
+	 3 start		start time		number
+	 4 end			end time		number
+	 5 speaker		speaker name or id	string
+	 6 speakerType		speaker type		string
+	 7 speakerDialect	speaker dialect		string
+	 8 transcript		transcript		string
+	 9 section		section id		number
+	10 turn			turn id			number
+	11 segment		segment id		number
+	12 sectionType		section type		string
+	13 suType		SU type			string
+
+Note that the section ID, turn ID and segment ID fields can be used in an
+application specific way. For instance, XTrans outputs some values for these
+fields, but no assumption should be made on them.
+
+In addition to the body of segments, there are a few lines of
+meta-information.  The first line of the file declares the field
+specification for segments (shown above) in the following format.
+
+	file;unicode	channel;int	start;float	...
+
+The second and third lines specifies where the "real" section boundaries
+are and what types they are.  For example,
+
+	;;MM sectionTypes	[u'report', u'nontrans', None]
+	;;MM sectionBoundaries	[0.0, 425.3, 9999999.0]
+
+means that the first section starts at 0.0 second and its type is
+"report" and the second section starts at 425.3 seconds and its type is
+"nontrans" and this is the last section (last ones are ignored).
+
+These two lines are optional.  In fact, some transcripts such as
+telephone speech transcripts may not include this section information.
+
+Besides these, comments are allowed anywhere in the file except for the
+first line.  A comment line starts with ";;" and ignoring this line
+doesn't cause any problem to the data integrity with one exception that
+lines starting with ";;MM" might have meaningful information as shown in
+the section boundary example above.
+
+
+BNF Style Definition of TDF for LDC Transcripts
+-----------------------------------------------
+
+LDCTDF ::= HEADER META BODY
+
+HEADER ::= "file;unicode" TAB "channel;int" TAB "start;float" TAB
+           "end;float" TAB "speaker;unicode" TAB "speakerType;unicode" TAB
+           "speakerDialect;unicode" TAB "transcript;unicode" TAB
+           "section;int" TAB "turn;int" TAB "segment;int" TAB
+           "sectionType;unicode" TAB "suType;unicode" NL
+
+META ::= META-LINE | META META-LINE
+META-LINE ::= ";;MM" SPC META-NAME TAB META-VALUE NL
+META-NAME ::= STR
+META-VALUE ::= STR-QUOT | STR-U | INT | FLOAT | LIST
+
+BODY ::= SEGMENT | COMMENT | BODY SEGMENT | BODY COMMENT
+SEGMENT ::= CELL-FILE TAB CELL-CH TAB CELL-START TAB CELL-END TAB
+            CELL-SPKR TAB CELL-TYP TAB CELL-DIAL TAB CELL-TRANS TAB
+            CELL-SEC TAB CELL-TRN TAB CELL-SEG TAB
+            CELL-SECTYP TAB CELL-SUTYP NL
+COMMENT ::= ";;" NON-MM-STRING NL
+CELL-FILE   ::= STR
+CELL-CH     ::= INT
+CELL-START  ::= FLOAT
+CELL-END    ::= FLOAT
+CELL-SPKR   ::= STR
+CELL-TYP    ::= STR
+CELL-DIAL   ::= STR
+CELL-TRANS  ::= STR
+CELL-SEC    ::= INT
+CELL-TRN    ::= INT
+CELL-SEG    ::= INT
+CELL-SECTYP ::= STR
+CELL-SUTYP  ::= STR
+
+LIST ::= "[" LIST-BODY "]"
+LIST-BODY ::= STR-QUOT | STR-U | INT | FLOAT |
+              LIST-BODY "," STR-QUOT |
+              LIST-BODY "," STR-U |
+              LIST-BODY "," INT |
+              LIST-BODY "," FLOAT
+
+STR ::= (a string that doesn't contain a tab character nor a newline
+        character)
+STR-QUOT ::= (same as STR except that it is double-quoted (single-quoted)
+        and any double (single) quotation mark within the beginning and
+        ending double-quotes (single-quotes) should be escaped with '\')
+STR-U ::= (same as STR-QUOT except that it begins with 'u')
+INT ::= (a string representing an integer)
+FLOAT ::= (a string representing a float point number)
+NON-MM-STRING ::= (any string that doesn't start with "MM " and doesn't
+        contain a newline character)
+SPC ::= (space character)
+TAB ::= (tab character)
+NL ::= (newline character which may be OS-dependent)
+
+
+
+References
+----------
+
+RTTM Format, http://www.nist.gov/speech/tests/rt/rt2003/fall/docs/RTTM-format-v13.pdf
+
+
