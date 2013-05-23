@@ -695,6 +695,7 @@ class Waveform(QtGui.QWidget):
         self.speedSlider = speedSlider
         self.hasRuler = False
         self.sndfiles = {}
+        self.dummysndfiles = {}
 
         ##
         ## public properties
@@ -800,6 +801,7 @@ class Waveform(QtGui.QWidget):
         name = sndfile.getFileName()
         if name in self.sndfiles: return
         self.sndfiles[name] = sndfile
+        self.dummysndfiles[name] = True
         return sndfile
         
     def removeSndFile(self, filename):
@@ -829,6 +831,7 @@ class Waveform(QtGui.QWidget):
             if i is not None:
                 self.grid.removeRow(i)
         del self.sndfiles[filename]
+        del self.dummysndfiles[filename]
         
     def getSndFiles(self):
         """
@@ -846,6 +849,8 @@ class Waveform(QtGui.QWidget):
     def getMaxEndTime(self):
         t = -9999999.0
         for sndfile in self.sndfiles.values():
+            if sndfile.getFileName() in self.dummysndfiles:
+                continue
             t = max(t,sndfile.getLengthSeconds())
         return t
 
