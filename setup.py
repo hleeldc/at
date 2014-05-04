@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name="at",
-      version="1.0",
+      version="1.0.0",
       packages=['at4'],
       package_dir={'at4':'src'}
       )
