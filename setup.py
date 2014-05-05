@@ -6,5 +6,6 @@ setup(name="at",
       author_email="hajoong@ldc.upenn.edu",
       url="https://github.com/hleeldc/at",
       packages=['at4'],
-      package_dir={'at4':'src'}
+      package_dir={'at4':'src'},
+      data_files=[('docs',['docs/TDF_format.txt'])]
       )
